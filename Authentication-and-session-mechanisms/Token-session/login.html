@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Validate User Screen</title>
+</head>
+
+
+<body id="view">
+
+<h1>Login</h1>
+<input id="usernameInput" type="text" placeholder="Nombre de usuario" value="">
+<input id="passwordInput" type="password" placeholder="Contraseña" value="">
+<button id="validateUserButton">Login</button>
+<button id="userBtnList" disabled>Obtener Lista de Usuarios</button>
+
+</body>
+
+<script type="text/javascript">
+	
+
+
+function getFormValues()
+{
+	let validateFormData =
+	{
+		username: null,
+		password: null
+	};
+
+	validateFormData.username = document.getElementById('usernameInput').value;
+	validateFormData.password = document.getElementById('passwordInput').value;
+
+	
+
+	return validateFormData;
+}
+
+function getSessionToken()
+{
+	let authData =
+	{
+		token: window.sessionStorage.getItem('token')
+	};
+
+	return authData;
+}
+
+function welcomeView( data )
+{
+	if ( data.status == 'OK')
+	{
+		alert('Bienvenido al sistema usuario: '+data.response );
+		window.sessionStorage.setItem('token', data.response );
+		document.getElementById('userBtnList').disabled = false;
+	}
+	else
+	{
+		alert('ERROR: '+data.description);
+	}
+}
+
+function UserListView(data)
+{
+	if ( data.status == 'OK')
+	{
+		alert('Lista de usuarios: '+data.response );
+	}
+	else
+	{
+		alert('ERROR: '+data.description);
+	}
+}
+
+
+function onValidateUserButtonClick()
+{
+	//console.log(JSON.stringify(getFormValues()));
+	fetch('./login.php', { method:'post', body: JSON.stringify(getFormValues()) } )
+	.then( response => response.json() )
+	.then( response => { welcomeView(response) } );
+	
+}
+
+function onGetUsersList()
+{
+	//console.log(JSON.stringify(getFormValues()));
+	fetch('./listarUsuarios.php', { method:'post', body: JSON.stringify(getSessionToken()) } )
+	.then( response => response.json() )
+	.then( response => { welcomeView(response) } );
+	
+}
+
+document.getElementById('validateUserButton').addEventListener('click', ()=>onValidateUserButtonClick() );
+
+document.getElementById('userBtnList').addEventListener('click', ()=>onGetUsersList() );
+
+
+</script>
+</html>
